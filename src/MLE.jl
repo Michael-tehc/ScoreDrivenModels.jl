@@ -121,7 +121,7 @@ function fit!(gas::ScoreDrivenModel{D, T}, y::Vector{T};
     for i = 1:n_initial_points
         func = TwiceDifferentiable(
             psi_tilde -> log_lik(psi_tilde, y, gas_fit, initial_params, unknowns, n),
-            opt_method.initial_points[i], autodiff=:forward
+            opt_method.initial_points[i]
         )
         try
             opt_result = optimize(func, opt_method, verbose, i, time_limit_sec)
