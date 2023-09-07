@@ -1,12 +1,14 @@
-export score_driven_recursion, fitted_mean, simulate_recursion
+export score_driven_recursion, fitted_mean, fitted_var, simulate_recursion
 
 """
-    score_driven_recursion(sd_model::SDM, observations::Vector{T}) where T
+$TYPEDSIGNATURES
 
 start with the stationary params for a
 """
-function score_driven_recursion(gas::ScoreDrivenModel{D, T}, observations::Vector{T};
-                                 initial_params::Matrix{T} = stationary_initial_params(gas)) where {D, T}
+function score_driven_recursion(
+    gas::ScoreDrivenModel{D, T}, observations::Vector{T};
+    initial_params::Matrix{T} = stationary_initial_params(gas)
+) where {D, T}
     @assert gas.scaling in SCALINGS
     # Allocations
     n = length(observations)
@@ -127,8 +129,7 @@ function update_param_tilde!(param_tilde::Matrix{T}, ω::Vector{T}, A::Dict{Int,
 end
 
 """
-    fitted_mean(gas::ScoreDrivenModel{D, T}, observations::Vector{T};
-                initial_params::Matrix{T}=stationary_initial_params(gas)) where {D, T}
+$TYPEDSIGNATURES
 
 Returns the fitted mean of the in-sample series, i.e., the mean of the predictive
 distribution at each time step using the fitted parameters in `gas`.
@@ -149,4 +150,30 @@ function fitted_mean(gas::ScoreDrivenModel{D, T}, observations::Vector{T};
     end
 
     return fitted_mean
+end
+
+"""
+$TYPEDSIGNATURES
+
+Returns the fitted variance of the in-sample series, i.e., the variance of the predictive
+distribution at each time step using the fitted parameters in `gas`.
+"""
+function fitted_var(
+    gas::ScoreDrivenModel{D, T}, observations::Vector{T};
+    initial_params::Matrix{T} = stationary_initial_params(gas)
+) where {D, T}
+    params_fitted = score_driven_recursion(gas, observations; initial_params = initial_params)
+
+    # Discard last step of the update
+    params_fitted = params_fitted[1:end-1, :]
+
+    n = size(params_fitted, 1)
+    fitted_var = Vector{T}(undef, n)
+
+    for t in axes(params_fitted, 1)
+        sdm_dist = update_dist(D, params_fitted, t)
+        fitted_var[t] = var(sdm_dist)
+    end
+
+    fitted_var
 end
