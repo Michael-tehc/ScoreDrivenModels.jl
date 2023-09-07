@@ -55,7 +55,7 @@ International Journal of Forecasting, 32(3), 875-887.
 You can pass the desired quantiles as a `Vector{T}`. The default behavior is to
 forecast the median and the `0.025` and `0.975` quantiles.
 
-By default 1000 scenarios are used but you can change this by switching the `S` keyword argument.
+By default 10'000 scenarios are used but you can change this by switching the `S` keyword argument.
 
 By default this method uses the `stationary_initial_params` method to perform the
 score driven recursion. If you estimated the model with a different set of `initial_params`
@@ -67,8 +67,7 @@ function forecast(
     quantiles::Vector{T} = T.([0.025, 0.5, 0.975]), S::Int = 10_000
 )::Forecast where {D, T}
     @assert H > 0
-    observation_scenarios, parameter_scenarios = simulate(series, gas, H, S;
-                                                    initial_params = initial_params)
+    observation_scenarios, parameter_scenarios = simulate(series, gas, H, S; initial_params)
     parameters_forecast = mean(parameter_scenarios, dims = 3)[:, :, 1]
     observations_forecast = Vector{T}(undef, H)
     variance_forecast = similar(observations_forecast)
