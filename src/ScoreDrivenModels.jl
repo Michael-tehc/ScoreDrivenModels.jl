@@ -1,5 +1,6 @@
 module ScoreDrivenModels
 
+using DocStringExtensions
 using Distributions
 using Distributions: AffineDistribution, value_support
 using HypothesisTests
@@ -8,7 +9,7 @@ using Optim
 using Printf
 using RecipesBase
 using SpecialFunctions
-using StatsBase
+using StatsBase, Statistics
 
 import Base: length, deepcopy, show
 
@@ -18,10 +19,10 @@ const SMALL_NUM = 1e-8
 
 # Core files
 include("abstracts.jl")
+include("model.jl")
 include("utils.jl")
 include("link_functions.jl")
 include("score.jl")
-include("model.jl")
 include("initial_params.jl")
 include("simulate.jl")
 include("diagnostics.jl")

@@ -1,10 +1,13 @@
-function check_model_estimated(len::Int)
+function check_model_estimated(len::Int)::Bool
     if len == 0
-        println("Score Driven Model does not have unknowns.")
+        @warn "Score Driven Model does not have unknowns."
         return true
     end
     return false
 end
+
+check_model_estimated(gas::ScoreDrivenModel)::Bool =
+    gas |> find_unknowns |> length |> check_model_estimated
 
 function NaN2zero!(m::Matrix{T}, i::Integer) where T
     for j in axes(m, 2)

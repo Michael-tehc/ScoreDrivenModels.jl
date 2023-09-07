@@ -107,16 +107,10 @@ function fit!(gas::ScoreDrivenModel{D, T}, y::Vector{T};
     n_unknowns = length(unknowns)
     check_model_estimated(n_unknowns) && return gas
 
-    verbose in [0, 1, 2, 3] || throw(ErrorException, "verbose argument must be in [0, 1, 2, 3]")
+    verbose in [0, 1, 2, 3] || throw(ErrorException("verbose argument must be in [0, 1, 2, 3]"))
     # Number of initial_points and number of params to estimate
     n_initial_points = length(opt_method.initial_points)
     n = length(y)
-
-    unknowns = find_unknowns(gas)
-    n_unknowns = length(unknowns)
-
-    # Check if the model has no unknowns
-    check_model_estimated(n_unknowns) && return gas
 
     # Create a copy of the model to estimate
     gas_fit = deepcopy(gas)
