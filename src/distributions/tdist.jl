@@ -28,13 +28,18 @@ function fisher_information!(aux::AuxiliaryLinAlg{T}, ::Type{TDist}, param::Matr
     return
 end
 
-function log_likelihood(::Type{TDist}, y::Vector{T}, param::Matrix{T}, n::Int) where T
+"""
+$TYPEDSIGNATURES
+
+Actually returns _negative_ log-likelihood.
+"""
+function log_likelihood(::Type{TDist}, y::Vector{T}, param::Matrix{T}, nobs::Int)::T where T
     loglik = zero(T)
-    for t in 1:n
+    for t in 1:nobs
         loglik -= 0.5 * log(param[t, 1]) + logbeta(0.5, param[t, 1]/2) + ((param[t, 1] + 1)/2) *
                   log(1 + (y[t]^2)/param[t, 1])
     end
-    return -loglik
+    -loglik
 end
 
 # Links
@@ -52,14 +57,9 @@ function jacobian_link!(aux::AuxiliaryLinAlg{T}, ::Type{TDist}, param::Matrix{T}
 end
 
 # utils 
-function update_dist(::Type{TDist}, param::Matrix{T}, t::Int) where T
-    return TDist(param[t, 1])
-end 
+update_dist(::Type{TDist}, param::Matrix, t::Int) =
+    TDist(param[t, 1])
 
-function params_sdm(d::TDist)
-    return Distributions.params(d)
-end
+params_sdm(d::TDist) = Distributions.params(d)
 
-function num_params(::Type{TDist})
-    return 1
-end
+num_params(::Type{TDist}) = 1

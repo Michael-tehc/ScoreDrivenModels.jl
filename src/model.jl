@@ -156,6 +156,11 @@ function length(unknowns::Unknowns)
     return len
 end
 
+"""
+$TYPEDSIGNATURES
+
+Actually returns _negative_ log-likelihood.
+"""
 function log_lik(psitilde::Vector{T}, y::Vector{T}, gas::ScoreDrivenModel{D, T},
                  initial_params::Matrix{T}, unknowns::Unknowns, n::Int) where {D, T}
 
