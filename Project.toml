@@ -1,25 +1,27 @@
 name = "ScoreDrivenModels"
 uuid = "4a87933e-d659-11e9-0e65-7f40dedd4a3a"
 authors = ["guilhermebodin <guilherme.b.moraes@gmail.com>, raphaelsaavedra <raphael.saavedra93@gmail.com>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 Distributions = "0.25"
-HypothesisTests = "0.10"
+HypothesisTests = "0.11"
 Optim = "1.2"
 RecipesBase = "1"
 SpecialFunctions = "1, 2"
-StatsBase = "0.33"
+StatsBase = "0.34"
 julia = "1.6"
 
 [extras]
