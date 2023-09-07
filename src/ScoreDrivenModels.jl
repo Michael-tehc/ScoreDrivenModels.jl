@@ -17,6 +17,8 @@ const SCALINGS  = [0.0, 1/2, 1.0]
 const BIG_NUM = 1e8
 const SMALL_NUM = 1e-8
 
+const AV{T} = AbstractVector{T}
+
 # Core files
 include("abstracts.jl")
 include("model.jl")
