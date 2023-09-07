@@ -4,6 +4,7 @@ mutable struct Forecast{T <: AbstractFloat}
     observation_quantiles::Matrix{T}
     observation_forecast::Vector{T}
     observation_scenarios::Matrix{T}
+    variance_forecast::Vector{T}
     parameter_quantiles::Array{T, 3}
     parameter_forecast::Matrix{T}
     parameter_scenarios::Array{T, 3}
@@ -43,7 +44,7 @@ end
 
 
 """
-    forecast(series::Vector{T}, gas::ScoreDrivenModel{D, T}, H::Int; kwargs...) where {D, T}
+$TYPEDSIGNATURES
 
 Forecast quantiles for future values of a time series by updating the GAS recursion `H` times and
 using Monte Carlo method as in Blasques, Francisco, Siem Jan Koopman,
@@ -60,26 +61,29 @@ By default this method uses the `stationary_initial_params` method to perform th
 score driven recursion. If you estimated the model with a different set of `initial_params`
 use them here to maintain the coherence of your estimation.
 """
-function forecast(series::Vector{T}, gas::ScoreDrivenModel{D, T}, H::Int;
-                    initial_params::Matrix{T} = stationary_initial_params(gas),
-                    quantiles::Vector{T} = T.([0.025, 0.5, 0.975]), S::Int = 10_000) where {D, T}
-
+function forecast(
+    series::Vector{T}, gas::ScoreDrivenModel{D, T}, H::Int;
+    initial_params::Matrix{T} = stationary_initial_params(gas),
+    quantiles::Vector{T} = T.([0.025, 0.5, 0.975]), S::Int = 10_000
+)::Forecast where {D, T}
+    @assert H > 0
     observation_scenarios, parameter_scenarios = simulate(series, gas, H, S;
                                                     initial_params = initial_params)
     parameters_forecast = mean(parameter_scenarios, dims = 3)[:, :, 1]
     observations_forecast = Vector{T}(undef, H)
+    variance_forecast = similar(observations_forecast)
     for i in 1:H
         dist = update_dist(D, parameters_forecast, i)
         observations_forecast[i] = mean(dist)
+        variance_forecast[i] = var(dist)
     end
     return Forecast(
         get_quantiles(quantiles, observation_scenarios),
-        observations_forecast,
-        observation_scenarios,
+        observations_forecast, observation_scenarios,
+        variance_forecast,
         get_quantiles(quantiles, parameter_scenarios),
-        parameters_forecast,
-        parameter_scenarios
-        )
+        parameters_forecast, parameter_scenarios
+    )
 end
 
 function get_quantiles(quantiles_probs::Vector{T}, scenarios::Matrix{T}) where T
