@@ -2,8 +2,6 @@ function ensure_seeds_dimensions(model::ScoreDrivenModel{D, T}, initial_points::
     # Querying number of unknowns
     n_psi = dim_unknowns(model)
 
-    n_initial_points = length(initial_points)
-
     for (i, initial_point) in enumerate(initial_points)
         if length(initial_point) != n_psi
             error("Seed $i has $(length(initial_point)) elements and the model has $n_psi unknowns.")
@@ -25,28 +23,26 @@ function create_initial_points(model::ScoreDrivenModel{D, T}, n_initial_points::
     return initial_points
 end
 
-function optimize(func::Optim.TwiceDifferentiable, opt_method::AbstractOptimizationMethod{T},
-                  optimizer::Optim.AbstractOptimizer, verbose::Int, i::Int, time_limit_sec::Int) where T
+optimize(
+    func::Optim.TwiceDifferentiable, opt_method::AbstractOptimizationMethod,
+    optimizer::Optim.AbstractOptimizer, verbose::Int, i::Int, time_limit_sec::Int
+) = Optim.optimize(
+    func, opt_method.initial_points[i], optimizer,
+    Optim.Options(
+        f_tol=opt_method.f_tol, g_tol=opt_method.g_tol,
+        iterations=opt_method.iterations, show_trace=show_trace(verbose), time_limit=time_limit_sec
+    )
+)
 
-    return Optim.optimize(func, opt_method.initial_points[i], optimizer,
-                                                     Optim.Options(f_tol = opt_method.f_tol,
-                                                                   g_tol = opt_method.g_tol,
-                                                                   iterations = opt_method.iterations,
-                                                                   show_trace = show_trace(verbose),
-                                                                   time_limit = time_limit_sec))
-end
+optimize(
+    func::Optim.TwiceDifferentiable, opt_method::AbstractOptimizationMethod, cons::Optim.TwiceDifferentiableConstraints,
+    optimizer::Optim.AbstractOptimizer, verbose::Int, i::Int, time_limit_sec::Int
+) = Optim.optimize(
+    func, cons, opt_method.initial_points[i], optimizer,
+    Optim.Options(
+        f_tol=opt_method.f_tol, g_tol=opt_method.g_tol,
+        iterations=opt_method.iterations, show_trace=show_trace(verbose), time_limit=time_limit_sec
+    )
+)
 
-function optimize(func::Optim.TwiceDifferentiable, opt_method::AbstractOptimizationMethod{T},
-                  cons::Optim.TwiceDifferentiableConstraints,
-                  optimizer::Optim.AbstractOptimizer,
-                  verbose::Int, i::Int, time_limit_sec::Int) where T
-
-    return Optim.optimize(func, cons, opt_method.initial_points[i], optimizer,
-                                                     Optim.Options(f_tol = opt_method.f_tol,
-                                                                   g_tol = opt_method.g_tol,
-                                                                   iterations = opt_method.iterations,
-                                                                   show_trace = show_trace(verbose),
-                                                                   time_limit = time_limit_sec))
-end
-
-show_trace(verbose::Int) =  (verbose == 3 ? true : false)
+show_trace(verbose::Int)::Bool = (verbose == 3)
