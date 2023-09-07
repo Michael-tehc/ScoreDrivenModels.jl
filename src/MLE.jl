@@ -68,12 +68,12 @@ mutable struct AuxEstimation{T <: AbstractFloat}
     opt_result::Vector{Optim.OptimizationResults}
 
     function AuxEstimation{T}() where T
-        return new(
+        return new{T}(
             Vector{Vector{T}}(undef, 0), #psi
             Vector{Matrix{T}}(undef, 0),
             Vector{T}(undef, 0), # loglikelihood
             Vector{Optim.OptimizationResults}(undef, 0) # opt_result
-            )
+        )
     end
 end
 
@@ -95,13 +95,13 @@ function update_aux_estimation!(aux_est::AuxEstimation{T}, func::Optim.TwiceDiff
     return
 end
 
-function fit!(gas::ScoreDrivenModel{D, T}, y::Vector{T};
-             initial_params::Matrix{T} = DEFAULT_INITIAL_PARAM,
-             opt_method::AbstractOptimizationMethod = NelderMead(gas, DEFAULT_NUM_SEEDS),
-             verbose::Int = DEFAULT_VERBOSE,
-             throw_errors::Bool = false,
-             time_limit_sec::Int = 10^8) where {D, T}
-
+"$TYPEDSIGNATURES"
+function fit!(
+    gas::ScoreDrivenModel{D, T}, y::Vector{T};
+    initial_params::Matrix{T} = DEFAULT_INITIAL_PARAM,
+    opt_method::AbstractOptimizationMethod = NelderMead(gas, DEFAULT_NUM_SEEDS),
+    verbose::Int = DEFAULT_VERBOSE, throw_errors::Bool = false, time_limit_sec::Int = 10^8
+) where {D, T}
     unknowns = find_unknowns(gas)
     # Check if the model has no unknowns
     n_unknowns = length(unknowns)
@@ -129,17 +129,13 @@ function fit!(gas::ScoreDrivenModel{D, T}, y::Vector{T};
             verbose >= 1 && println("Round $i of $n_initial_points: log-likelihood = $(-opt_result.minimum * length(y))")
         catch err
             println(err)
-            if throw_errors
-                throw(err)
-            end
+            throw_errors && throw(err)
+
             verbose >= 1 && println("Round $i diverged")
         end
     end
 
-    if isempty(aux_est.loglikelihood)
-        verbose >= 1 && println("No initial point converged.")
-        return
-    end
+    isempty(aux_est.loglikelihood) && error("No initial point converged.")
 
     best_llk, best_seed = findmax(aux_est.loglikelihood)
     # We optimize the average loglikelihood inside log_lik
